@@ -39,6 +39,11 @@ return {
   opts = {
     sources = { "filesystem", "buffers", "git_status", "document_symbols" },
     filesystem = {
+      filtered_items = {
+        visible = true, -- This is what you want: If you set this to `true`, all "hide" just mean "dimmed out"
+        hide_dotfiles = false,
+        hide_gitignored = true,
+      },
       bind_to_cwd = false,
       follow_current_file = true,
       use_libuv_file_watcher = true,
