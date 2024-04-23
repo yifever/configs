@@ -1,0 +1,8 @@
+return {
+  "yifever/logo.nvim",
+  config = true,
+  lazy = false,
+  dependencies = {
+    "3rd/image.nvim",
+  }
+}

@@ -57,6 +57,8 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua"
+package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua"
 -- NOTE: Here is where you install your plugins.
 --  You can configure plugins using the `config` key.
 --
@@ -64,7 +66,6 @@ vim.opt.rtp:prepend(lazypath)
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
-
   -- LazyVim Utils
   'LazyVim/LazyVim',
 
@@ -75,7 +76,6 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'sheerun/vim-polyglot',
   -- 'tpope/vim-sleuth',
-
   {
     -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
@@ -145,10 +145,8 @@ require('lazy').setup({
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
-    opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
-    },
+    main = "ibl",
+    opts = {},
   },
 
   -- "gc" to comment visual regions/lines
@@ -422,6 +420,7 @@ local servers = {
   -- gopls = {},
   pyright = {},
   svelte = {},
+  -- eslint = {},
   -- rust_analyzer = {},
   tsserver = {},
 
@@ -509,4 +508,6 @@ cmp.setup {
 require('keymap.keymap')
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
---
+require('startup').setup()
+-- local minintro_opened = false
+LazyVim = require("lazyvim.util")
