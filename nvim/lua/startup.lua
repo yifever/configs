@@ -99,18 +99,6 @@ local function setup(options)
 			img_api.clear("vimstart")
 		end,
 	})
-
-	vim.api.nvim_create_autocmd("User", {
-		pattern = "StartupScreen",
-		callback = function()
-			vim.opt.laststatus = 0
-			vim.api.nvim_create_autocmd("BufEnter", {
-				callback = function()
-					vim.opt.laststatus = 2
-				end,
-			})
-		end,
-	})
 end
 
 return {
