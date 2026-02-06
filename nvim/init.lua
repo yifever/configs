@@ -41,6 +41,7 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -81,12 +82,15 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
-      { 'williamboman/mason.nvim', config = true },
+      {
+        'williamboman/mason.nvim',
+        config = true,
+      },
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim',       opts = {} },
+      { 'j-hui/fidget.nvim', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -516,22 +520,8 @@ end
 local servers = {
   -- clangd = {},
   -- gopls = {},
-  pyright = {},
-  svelte = {},
   -- eslint = {},
   -- rust_analyzer = {},
-  tsserver = {},
-
-  jsonls = {
-    settings = {
-      json = {
-        format = {
-          enable = true,
-        },
-      },
-      validate = { enable = true },
-    },
-  },
 
   lua_ls = {
     Lua = {
@@ -539,7 +529,70 @@ local servers = {
       telemetry = { enable = false },
     },
   },
+
 }
+
+local venv = os.getenv("VIRTUAL_ENV")
+if venv then
+  vim.g.python3_host_prog = venv .. "/bin/python3"
+end
+
+vim.lsp.set_log_level("debug")
+
+vim.lsp.config('ty', {
+  settings = {
+    ty = {
+      -- ty language server settings go here
+    }
+  }
+})
+
+-- Required: Enable the language server
+vim.lsp.enable('ty')
+
+-- vim.lsp.config('pylsp', {
+--   -- cmd = { 'pylsp' },
+--   cmd = { vim.fn.expand('/Users/yifever/Projects/dgm-backend/.venv/bin/pylsp') },
+--   filetypes = { 'python' },
+--   root_markers = { 'pyproject.toml', 'setup.py', '.git' },
+--   settings = {
+--     pylsp = {
+--       plugins = {
+--         -- formatter options
+--         black = { enabled = true },
+--         autopep8 = { enabled = false },
+--         yapf = { enabled = false },
+--         -- linter options
+--         mccabe = { enabled = false },
+--         pylint = { enabled = true },
+--         pyflakes = { enabled = false },
+--         pycodestyle = { enabled = true },
+--         -- type checker
+--         pylsp_mypy = {
+--           enabled = true,
+--           -- overrides = { "--python-executable", "/Users/yifever/Projects/dgm-backend/.venv/bin/python3", true },
+--           live_mode = true,
+--           strict = false
+--         },
+--         -- auto-completion options
+--         jedi_completion = { fuzzy = true },
+--         -- import sorting
+--         pyls_isort = { enabled = true },
+--       },
+--       flags = {
+--         debounce_text_changes = 200,
+--
+--       },
+--     },
+--   },
+--   -- Optional: disable formatting capability entirely
+--   on_attach = function(client, bufnr)
+--     client.server_capabilities.documentFormattingProvider = false
+--     client.server_capabilities.documentRangeFormattingProvider = false
+--   end,
+--
+-- })
+
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -552,19 +605,7 @@ mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
 
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-    }
-  end,
-  -- ["pylsp"] = function()
-  --  require("pylsp").setup {}
-  -- end
 
-}
 
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`

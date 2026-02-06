@@ -4,17 +4,18 @@ return {
   lazy = false,
   version = false, -- Set this to "*" to always pull the latest release version, or set it to false to update to the latest code changes.
   opts = {
-    -- add any opts here
-    -- for example
-    provider = "claude",
-    claude = {
-      endpoint = "https://api.anthropic.com",
-      model = "claude-sonnet-4-20250514", -- your desired model (or use gpt-4o, etc.)
-      timeout = 30000,                    -- timeout in milliseconds
-      temperature = 0,                    -- adjust if needed
-      max_tokens = 4096,
-      disable_tools = true,
-      -- reasoning_effort = "high" -- only supported for reasoning models (o1, etc.)
+    --- other configuration items ...
+    provider = "claude", -- Set Claude as default provider
+    providers = {
+      claude = {
+        endpoint = "https://api.anthropic.com",
+        model = "claude-sonnet-4-5-20250929", -- or claude-opus-4-20250514 for most capable
+        timeout = 30000,
+        extra_request_body = {
+          temperature = 0,
+          max_tokens = 8192, -- Claude can handle up to 8192 output tokens
+        },
+      },
     },
   },
   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`

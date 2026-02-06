@@ -6,7 +6,7 @@ local logo_buff = -1
 local cache_dir = vim.fn.stdpath("cache")
 local img_api = require("image")
 
-local vimimage = require("image").from_file("~/configs/nvim/VIMTRANS.png", {
+local vimimage = require("image").from_file("/Users/yifever/.config/nvim/VIMTRANS.png", {
 	id = "vimstart",
 })
 
