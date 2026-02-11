@@ -29,6 +29,25 @@ is_installed() {
   esac
 }
 
+# Check nvim version is at least 0.11
+check_nvim_version() {
+  if ! command -v nvim &>/dev/null; then
+    return 1
+  fi
+
+  local version=$(nvim --version | head -1 | sed 's/NVIM v//' | cut -d. -f1,2)
+  local major=$(echo "$version" | cut -d. -f1)
+  local minor=$(echo "$version" | cut -d. -f2)
+
+  if [ "$major" -eq 0 ] && [ "$minor" -lt 11 ]; then
+    echo "ERROR: nvim version 0.11+ is required, but found v$version"
+    echo "Please upgrade nvim to version 0.11 or later"
+    exit 1
+  fi
+
+  echo "INFO nvim version v$version detected"
+}
+
 install_config() {
   local src="$1" dest="$2" name="$3" app="$4"
   local repo_ts system_ts
@@ -47,9 +66,13 @@ install_config() {
   fi
 
   if [ "$system_ts" -gt "$repo_ts" ] 2>/dev/null; then
-    echo "SKIP $name: system copy is newer (system=$(date -r "$system_ts" '+%Y-%m-%d %H:%M'), repo=$(date -r "$repo_ts" '+%Y-%m-%d %H:%M'))"
-    echo "  Commit your local changes to the repo first, then re-run."
-    return
+    echo "WARN $name: system copy is newer (system=$(date -r "$system_ts" '+%Y-%m-%d %H:%M'), repo=$(date -r "$repo_ts" '+%Y-%m-%d %H:%M'))"
+    printf "  Install older repo version anyway? [y/N] "
+    read -r answer
+    if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
+      echo "SKIP $name"
+      return
+    fi
   fi
 
   if [ -e "$dest" ]; then
@@ -67,6 +90,10 @@ install_config() {
 }
 
 install_config "$REPO_DIR/kitty"                    "$HOME/.config/kitty"                    "kitty"      "kitty"
+
+# Check nvim version before installing
+check_nvim_version
+
 install_config "$REPO_DIR/nvim"                     "$HOME/.config/nvim"                     "nvim"       "nvim"
 install_config "$REPO_DIR/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json" "karabiner"  "Karabiner-Elements.app"
 
