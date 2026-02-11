@@ -2,9 +2,10 @@ return {
   {
     "3rd/image.nvim",
     config = function()
-      require("image").setup({
-        backend = "kitty",         -- or "ueberzug" or "sixel"
-        processor = "magick_rock", -- or "magick_cli"
+      local ok, err = pcall(function()
+        require("image").setup({
+          backend = "kitty",         -- or "ueberzug" or "sixel"
+          processor = "magick_rock", -- or "magick_cli"
         integrations = {
           markdown = {
             enabled = true,
@@ -40,7 +41,12 @@ return {
         editor_only_render_when_focused = false,                                            -- auto show/hide images when the editor gains/looses focus
         tmux_show_only_in_active_window = false,                                            -- auto show/hide images in the correct Tmux window (needs visual-activity off)
         hijack_file_patterns = { "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.avif" }, -- render image files as images when opened
-      })
+        })
+      end)
+
+      if not ok then
+        vim.notify("Failed to setup image.nvim: " .. tostring(err), vim.log.levels.WARN)
+      end
     end
   }
 }

@@ -77,6 +77,8 @@ install_config() {
 
   if [ -e "$dest" ]; then
     echo "Backing up $dest -> ${dest}.bak"
+    # Remove old backup if it exists
+    rm -rf "${dest}.bak"
     mv "$dest" "${dest}.bak"
   fi
 
