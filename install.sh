@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -42,10 +41,11 @@ check_nvim_version() {
   if [ "$major" -eq 0 ] && [ "$minor" -lt 11 ]; then
     echo "ERROR: nvim version 0.11+ is required, but found v$version"
     echo "Please upgrade nvim to version 0.11 or later"
-    exit 1
+    return 1
   fi
 
   echo "INFO nvim version v$version detected"
+  return 0
 }
 
 install_config() {
@@ -89,12 +89,21 @@ install_config() {
   echo "OK   $name: copied to $dest"
 }
 
-install_config "$REPO_DIR/kitty"                    "$HOME/.config/kitty"                    "kitty"      "kitty"
+main() {
+  install_config "$REPO_DIR/kitty"                    "$HOME/.config/kitty"                    "kitty"      "kitty"
+  install_config "$REPO_DIR/tmux.conf"                "$HOME/.tmux.conf"                       "tmux"       "tmux"
 
-# Check nvim version before installing
-check_nvim_version
+  # Check nvim version before installing
+  if ! check_nvim_version; then
+    echo "Skipping nvim installation due to version requirement"
+    return 0
+  fi
 
-install_config "$REPO_DIR/nvim"                     "$HOME/.config/nvim"                     "nvim"       "nvim"
-install_config "$REPO_DIR/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json" "karabiner"  "Karabiner-Elements.app"
+  install_config "$REPO_DIR/nvim"                     "$HOME/.config/nvim"                     "nvim"       "nvim"
+  install_config "$REPO_DIR/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json" "karabiner"  "Karabiner-Elements.app"
 
-echo "Done!"
+  echo "Done!"
+}
+
+# Run main function
+main

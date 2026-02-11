@@ -4,11 +4,25 @@ local autocmd_group = vim.api.nvim_create_augroup(PLUGIN_NAME, {})
 local highlight_ns_id = vim.api.nvim_create_namespace(PLUGIN_NAME)
 local logo_buff = -1
 local cache_dir = vim.fn.stdpath("cache")
-local img_api = require("image")
 
-local vimimage = require("image").from_file(vim.fn.expand("~/.config/nvim/VIMTRANS.png"), {
-	id = "vimstart",
-})
+-- Try to load image.nvim, fail gracefully if not available
+local img_api_ok, img_api = pcall(require, "image")
+if not img_api_ok then
+	vim.notify("image.nvim not available", vim.log.levels.WARN)
+	return { setup = function() end }
+end
+
+-- Try to load the image, fail gracefully if it errors
+local vimimage_ok, vimimage = pcall(function()
+	return img_api.from_file(vim.fn.expand("~/.config/nvim/VIMTRANS.png"), {
+		id = "vimstart",
+	})
+end)
+
+if not vimimage_ok then
+	vim.notify("Failed to load VIMTRANS.png: " .. tostring(vimimage), vim.log.levels.WARN)
+	return { setup = function() end }
+end
 
 local function get_geometry(image)
 	local term_size   = require("image/utils").term.get_size()
