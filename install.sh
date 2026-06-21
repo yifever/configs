@@ -2,6 +2,8 @@
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+OS="$(uname -s)"
+
 # Get the last git commit epoch for a repo path (file or directory).
 repo_epoch() {
   git -C "$REPO_DIR" log -1 --format="%ct" -- "${1#$REPO_DIR/}"
@@ -11,11 +13,28 @@ repo_epoch() {
 # For a directory, finds the most recently modified file inside it.
 system_epoch() {
   if [ -d "$1" ]; then
-    find "$1" -type f -exec stat -f "%m" {} + 2>/dev/null | sort -rn | head -1
+    if [ "$OS" = "Darwin" ]; then
+      find "$1" -type f -exec stat -f "%m" {} + 2>/dev/null | sort -rn | head -1
+    else
+      find "$1" -type f -exec stat -c "%Y" {} + 2>/dev/null | sort -rn | head -1
+    fi
   elif [ -f "$1" ]; then
-    stat -f "%m" "$1"
+    if [ "$OS" = "Darwin" ]; then
+      stat -f "%m" "$1"
+    else
+      stat -c "%Y" "$1"
+    fi
   else
     echo 0
+  fi
+}
+
+# Format an epoch timestamp as a human-readable date.
+format_date() {
+  if [ "$OS" = "Darwin" ]; then
+    date -r "$1" '+%Y-%m-%d %H:%M'
+  else
+    date -d "@$1" '+%Y-%m-%d %H:%M'
   fi
 }
 
@@ -23,7 +42,9 @@ system_epoch() {
 is_installed() {
   local name="$1"
   case "$name" in
-    *.app) [ -d "/Applications/$name" ] || [ -d "$HOME/Applications/$name" ] ;;
+    *.app)
+      [ "$OS" = "Darwin" ] && { [ -d "/Applications/$name" ] || [ -d "$HOME/Applications/$name" ]; }
+      ;;
     *)     command -v "$name" &>/dev/null ;;
   esac
 }
@@ -66,7 +87,7 @@ install_config() {
   fi
 
   if [ "$system_ts" -gt "$repo_ts" ] 2>/dev/null; then
-    echo "WARN $name: system copy is newer (system=$(date -r "$system_ts" '+%Y-%m-%d %H:%M'), repo=$(date -r "$repo_ts" '+%Y-%m-%d %H:%M'))"
+    echo "WARN $name: system copy is newer (system=$(format_date "$system_ts"), repo=$(format_date "$repo_ts"))"
     printf "  Install older repo version anyway? [y/N] "
     read -r answer
     if [ "$answer" != "y" ] && [ "$answer" != "Y" ]; then
@@ -102,7 +123,9 @@ main() {
   fi
 
   install_config "$REPO_DIR/nvim"                     "$HOME/.config/nvim"                     "nvim"       "nvim"
-  install_config "$REPO_DIR/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json" "karabiner"  "Karabiner-Elements.app"
+  if [ "$OS" = "Darwin" ]; then
+    install_config "$REPO_DIR/karabiner/karabiner.json" "$HOME/.config/karabiner/karabiner.json" "karabiner"  "Karabiner-Elements.app"
+  fi
 
   echo "Done!"
 }
