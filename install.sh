@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
 OS="$(uname -s)"
 
